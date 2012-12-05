@@ -1,0 +1,117 @@
+      scaner.sh  - bash antivirus scanner
+
+SYNOPSIS
+
+     scaner.sh [-s DATABASE]  [-f FILE] [-r FOLDER] [-v OPTION] 
+
+DESCRIPTION
+
+     scaner.sh  scan files or directories given in the script options, to check if files contain one of the signatures given in a signature database. using Bash and standard Unix commands such as grep, od, awk, sed, find..
+
+OPTIONS
+
+    -f file = one file mode
+    -r folder = recursive mode
+    -s DATABASE = select DATABASE
+    -v = VERBOSE mode
+
+###########################################################################################################################
+                    od dump
+###########################################################################################################################
+
+Les deux lignes suivantes permettent de creer un dump, j'ai utiliser l'option An afin de pas avoir à utiliser awk ou sed.
+raw_file=$(od -t x1 -An $1 |tr -d '\n ')
+raw_file=$(xxd -p file | tr -d '\n')
+
+###########################################################################################################################
+                    Les logs
+###########################################################################################################################
+
+Chaque fichier détecté comme étant vérolée sera dans un fichier de log.
+Tous les logs sont stocké dans le même fichier "scan_report" présent dans le /home/$USER
+La date de début, le dossier/folder  et le temps d'exécution y sont aussi écrit.
+
+
+###########################################################################################################################
+                    les threads
+###########################################################################################################################
+
+Concernant les threads, chaque fichiers scanner est threader ainsi que chaque ligne de la DATABASE
+J'ai rencontré un problème de fork bomb.
+
+while (( $(jobs | wc -l) >= 8 )); do
+sleep 0.1
+jobs > /dev/null
+done
+J'ai eu recours a ce script afin de limiter le nombre de thread aussi bien pour
+la lecture  de chaque ligne de la DATABASE que pour chaque fichier.
+Un problème survient cependant cette limitation ce fait en fonction de chaque processeur.
+Sur un intel i5 4 cores, les valeurs à prendre sont celles implémentées dans le script.
+
+Toujours sur la même machine j'ai effectuer les tests suivants.
+
+
+scan d'un fichier (Trojan.Bancos) avec filtered.ndb:
+#real 0m28.270s
+#user 0m2.668s
+#sys 0m2.200s
+
+scan de dossier (test-files) avec filtered.ndb:
+#test-files/ folder 10items-1.1kB
+#real 4m31.305s
+#user 0m29.282s
+#sys 0m25.118s
+
+scan d'un dossier (25 items 15.4kB) avec filtered.ndb:
+#real 10m56.749s
+#user 1m19.941s
+#sys 1m3.008s
+
+Comme on peux le voir la moyenne de temps par fichier ne cesse de diminuer.
+
+#file     time     time/file
+#1     28     28
+#10     271     27.1
+#25     656     26.24
+
+###########################################################################################################################
+                    Comparaison ClamAV
+###########################################################################################################################
+
+Concernant la différence avec clamAV en utilisant les mêmes database et dossier.
+On s'aperçoit que clamAV est TRES rapide moins 0.1 sec pour scanner le dossier test-files/ avec la database filtered.ndb
+Mais qu'il ne DETECTE que 3 fichiers infectés sur les 10 scanné.
+
+
+
+#clamscan -d databases/filtered.ndb -r test-files/
+#test-files/VBS.Autorun: VBS.Autorun.UNOFFICIAL FOUND
+#test-files/Trojan.Bancos-166: OK
+#test-files/Trojan.DNSChanger-156: OK
+#test-files/VBS.Polsev.A: VBS.Polsev.A.UNOFFICIAL FOUND
+#test-files/Trojan.DNSChanger-797: OK
+#test-files/Worm.Allaple-1: OK
+#test-files/Trojan.Mybot-1249: OK
+#test-files/Trojan.DNSChanger-155: OK
+#test-files/JAVA.SendSMS: JAVA.SendSMS.UNOFFICIAL FOUND
+#test-files/Worm.Stration.GC: OK
+
+#----------- SCAN SUMMARY -----------
+#Known viruses: 9371
+#Engine version: 0.97.6
+#Scanned directories: 1
+#Scanned files: 10
+#Infected files: 3
+#Data scanned: 0.00 MB
+#Data read: 0.00 MB (ratio 0.00:1)
+#Time: 0.067 sec (0 m 0 s)
+
+###########################################################################################################################
+                    Problème non résolu
+###########################################################################################################################
+
+J'ai essaye d'implementer la second méthode à savoir de passer la signature de base présente en héxa string en binaire pour
+après tacher de matcher avec grep. Sans solution!!
+
+#printf -v variable $(sed 's/\(..\)/\\x\1/g;' <<< "$signature")
+#test_var=$(grep -UE "$variable" "$raw_file_path")

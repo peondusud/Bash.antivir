@@ -1,0 +1,12 @@
+This directory contains ClamAV databases and test files for the Bash antivirus project.
+
+The contents of the directories are:
+bash-antivirus
+|- README                this file
+|- databases
+|  |- main.ndb           a complete database coming from ClamAV distribution
+|  |- filtered.ndb       a filtered version for main.ndb, containing only signatures without metacharacters and without offset
+|- eicar
+|  |- *                  EICAR test files, infected by Eicar-Test-Signature (this signature is only in main.ndb)
+|- test-files
+|  |- *                  test files, where each file is infected by the virus that has the same name as the file

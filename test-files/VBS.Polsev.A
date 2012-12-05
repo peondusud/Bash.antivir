@@ -1,0 +1,1 @@
+Randomize:polyint4 = Int(Rnd * 9):if polyint > 2 then:polynew5 = replace(polynew4,
