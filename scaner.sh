@@ -108,12 +108,12 @@ function  read_signature_db_by_line()
 {
 cat $signature_path | (while read LINE ; do
        #read line by line each in a thread
-	stringtokenizer_line_db	$LINE $1 $raw_file &
-	    #stuff to limit thread must be adapt to each CPU
-	    while (( $(jobs | wc -l) >= 8 )); do
-		sleep 0.1
-		jobs > /dev/null
-	    done
+stringtokenizer_line_db	$LINE $1 $raw_file &
+    #stuff to limit thread must be adapt to each CPU
+    while (( $(jobs | wc -l) >= 8 )); do
+	sleep 0.1
+	jobs > /dev/null
+    done
 done
 wait
 )
@@ -160,27 +160,27 @@ signature=$(echo "$line" |awk -F':' '{ print $4 }')
 #echo_verbose "\e[1;33m' $name ** $target_type ** $offset ** $signature '\e[0m"
 
 if (( "$type_file" == "0" || "$type_file" == "$target_type" )) ; then
-	
-	#test to convert hexadecimal string to hex and try matching with grep NOT working
-	#tmp=$(echo -n $signature | sed 's/\([0-9A-F]\{2\}\)/\\\\\\x\1/gI' | xargs print)
-	#printf -v variable $(sed 's/\(..\)/\\x\1/g;' <<< "$signature")
-	#test_var=$(grep -UE "$variable" "$raw_file_path")
-	
-		if [ "$offset" == "*" ] ; then
-		test_var=$(echo $raw_file_path | grep $signature )
-		else
-		# add signature length to offset
-	 	size=$( echo "$offset ${#signature}" | awk '{print $1+$2}')
-		#chunk of signature size start at $offset
-		test_var=$(echo $raw_file_path | dd skip=$offset count=$size bs=1 2> /dev/null | grep  $signature ) 
-		fi
-	
-	if [ "$test_var" ] ; then
-	echo -e '\e[1;31m' $name "Virus found at " $test_file_path '\e[0m'
-	echo $name "Virus found at " $(pwd)/$test_file_path >> /home/$USER/scan_report
+
+#test to convert hexadecimal string to hex and try matching with grep NOT working
+#tmp=$(echo -n $signature | sed 's/\([0-9A-F]\{2\}\)/\\\\\\x\1/gI' | xargs print)
+#printf -v variable $(sed 's/\(..\)/\\x\1/g;' <<< "$signature")
+#test_var=$(grep -UE "$variable" "$raw_file_path")
+
+	if [ "$offset" == "*" ] ; then
+	test_var=$(echo $raw_file_path | grep $signature )
 	else
-	echo_verbose "\e[1;32m $name Virus not found at  $test_file_path \e[0m"
+	# add signature length to offset
+ 	size=$( echo "$offset ${#signature}" | awk '{print $1+$2}')
+	#chunk of signature size start at $offset
+	test_var=$(echo $raw_file_path | dd skip=$offset count=$size bs=1 2> /dev/null | grep  $signature ) 
 	fi
+
+if [ "$test_var" ] ; then
+echo -e '\e[1;31m' $name "Virus found at " $test_file_path '\e[0m'
+echo $name "Virus found at " $(pwd)/$test_file_path >> /home/$USER/scan_report
+else
+echo_verbose "\e[1;32m $name Virus not found at  $test_file_path \e[0m"
+fi
 fi
 }
 
@@ -195,27 +195,26 @@ echo "Scan Finished"
 echo "**** Time duration:" $( echo "$finish_time $start_time" | awk '{print $1-$2}') "secs.nano ****" >> /home/$USER/scan_report
 echo "">> /home/$USER/scan_report
 exit 1
-<<<<<<< HEAD
 
 #one file
-#real	0m28.270s
-#user	0m2.668s
-#sys	0m2.200s
+#real0m28.270s
+#user0m2.668s
+#sys0m2.200s
 
 #test-files/ folder 10items-1.1kB
-#real	4m31.305s
-#user	0m29.282s
-#sys	0m25.118s
+#real4m31.305s
+#user0m29.282s
+#sys0m25.118s
 
 #25 items 15.4kB
-#real	10m56.749s
-#user	1m19.941s
-#sys	1m3.008s
+#real10m56.749s
+#user1m19.941s
+#sys1m3.008s
 
 #file   time    time/file
-#1	28	28
-#10	271	27.1
-#25	656	26.24
+#128	28
+#10271	27.1
+#25656	26.24
 
 #clamscan -d databases/filtered.ndb  -r test-files/
 #test-files/VBS.Autorun: VBS.Autorun.UNOFFICIAL FOUND
@@ -238,26 +237,23 @@ exit 1
 #Data scanned: 0.00 MB
 #Data read: 0.00 MB (ratio 0.00:1)
 #Time: 0.067 sec (0 m 0 s)
-=======
+
 
 #one file
-#real	0m28.270s
-#user	0m2.668s
-#sys	0m2.200s
+#real0m28.270s
+#user0m2.668s
+#sys0m2.200s
 
 #test-files/ folder 10items-1.1kB
-#real	4m31.305s
-#user	0m29.282s
-#sys	0m25.118s
+#real4m31.305s
+#user0m29.282s
+#sys0m25.118s
 
 #25 items 15.4kB
-#real	10m56.749s
-#user	1m19.941s
-#sys	1m3.008s
+#real10m56.749s
+#user1m19.941s
+#sys1m3.008s
 
-#1	28	28
-#10	271	27.1
-#25	656	26.24
-
-
->>>>>>> refactor!
+#128	28
+#10271	27.1
+#25656	26.24
