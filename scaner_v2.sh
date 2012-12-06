@@ -195,7 +195,6 @@ echo "Scan Finished"
 echo "**** Time duration:" $( echo "$finish_time $start_time" | awk '{print $1-$2}') "secs.nano ****" >> /home/$USER/scan_report
 echo "">> /home/$USER/scan_report
 exit 1
-<<<<<<< HEAD
 
 #one file
 #real	0m28.270s
@@ -238,7 +237,7 @@ exit 1
 #Data scanned: 0.00 MB
 #Data read: 0.00 MB (ratio 0.00:1)
 #Time: 0.067 sec (0 m 0 s)
-=======
+
 
 #one file
 #real	0m28.270s
@@ -259,5 +258,3 @@ exit 1
 #10	271	27.1
 #25	656	26.24
 
-
->>>>>>> refactor!
